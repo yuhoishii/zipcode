@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>郵便番号検索</title>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        const search_url = 'https://zipcloud.ibsnet.co.jp/api/search';
+        //検索ボタンクリック時の処理
+        function search() {
+            let zip = $('#zip_input').val();
+            zip = zip.replace('-', '');//文字列の「-」を削除
+
+            // 非同期通信
+            $.ajax(
+                {
+                    url: search_url,
+                    type: 'get',
+                    dataType: 'json',
+                    data: {
+                        zipcode: zip
+                    }
+                }
+            ).done(  //通信が終わった時に呼ばれる処理
+                function (response) {
+                    const results = response.results;
+                    if (results == null || results.length == 0) {
+                        // エラーの時の処理
+                        $('#result_cell').css('color', 'red');
+                        $('#result_cell').html(response.message);
+                    } else {
+                        const element = results[0];
+                        const address = element.address1 + element.address2 + element.address3;
+                        $('#result_cell').css('color', 'black');
+                        $('#result_cell').html(address);
+                    }
+                }
+            );
+        }
+
+        // 初期化関数
+        function initialize(){
+            $('#search_button').click(search);
+        }
+
+        $('window').ready(initialize);
+    </script>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <th>郵便番号</th>
+            <td><input id="zip_input" type="text"></td>
+            <td><button id="search_button">検索</button></td>
+        </tr>
+    </table>
+    <div id="result_cell"></div>
+</body>
+
+</html>
